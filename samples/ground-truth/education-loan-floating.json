@@ -1,0 +1,136 @@
+{
+  "slug": "education-loan-floating",
+  "title": "Education Loan Agreement",
+  "file": "pdf/education-loan-floating.pdf",
+  "pageCount": 5,
+  "terms": {
+    "lenderName": {
+      "value": "Lumen Bank Limited",
+      "pages": [
+        1
+      ]
+    },
+    "principal": {
+      "amount": 1200000,
+      "pages": [
+        1,
+        4
+      ]
+    },
+    "interestRate": {
+      "annualPercent": 11.25,
+      "rateType": "floating",
+      "method": "reducing",
+      "benchmark": "Lumen 1-year MCLR plus 2.40%",
+      "pages": [
+        1,
+        4
+      ]
+    },
+    "tenureMonths": {
+      "value": 84,
+      "pages": [
+        2,
+        4
+      ]
+    },
+    "statedEmi": {
+      "amount": 20705,
+      "pages": [
+        2,
+        4
+      ]
+    },
+    "processingFee": {
+      "amount": 0,
+      "percent": 0,
+      "resolvedAmount": 0,
+      "pages": [
+        3,
+        4
+      ]
+    },
+    "insurancePremium": {
+      "amount": 4200,
+      "percent": null,
+      "pages": [
+        3,
+        4
+      ]
+    },
+    "otherUpfrontCharges": [],
+    "prepaymentCharges": {
+      "amount": 0,
+      "percent": 0,
+      "pages": [
+        3,
+        4
+      ]
+    },
+    "latePaymentCharges": {
+      "amount": null,
+      "percent": 2,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "bounceCharges": {
+      "amount": 250,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    }
+  },
+  "risks": [
+    {
+      "category": "cross_default",
+      "pages": [
+        3
+      ]
+    },
+    {
+      "category": "auto_debit_mandate",
+      "pages": [
+        2
+      ]
+    },
+    {
+      "category": "unilateral_rate_change",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "category": "arbitration",
+      "pages": [
+        4
+      ]
+    }
+  ],
+  "absentRisks": [
+    "penal_interest",
+    "broad_data_sharing",
+    "one_sided_termination",
+    "security_interest"
+  ],
+  "computed": {
+    "emi": 20705,
+    "totalRepayment": 1739220,
+    "totalInterest": 539220,
+    "upfrontCharges": 4200,
+    "netDisbursal": 1195800
+  },
+  "pii": {
+    "name": "Devika Nair",
+    "pan": "EFGPN2208H",
+    "aadhaar": "9173 5028 4634",
+    "phone": "+91-81234-56780",
+    "email": "devika.nair.demo@example.com",
+    "account": "61234567890",
+    "ifsc": "LUMN0100234",
+    "address": "18 Marine Lines, Kochi 682031"
+  }
+}

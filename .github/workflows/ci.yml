@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: docsense
+          POSTGRES_PASSWORD: docsense
+          POSTGRES_DB: docsense
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U docsense -d docsense"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://docsense:docsense@localhost:5432/docsense
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run migrate
+      - run: npm run test:unit
+      - run: npm run test:integration -w apps/server
+      - name: verify committed samples are reproducible
+        run: |
+          npm run samples:generate
+          git diff --exit-code -- samples/ground-truth samples/index.json

@@ -1,0 +1,155 @@
+{
+  "slug": "home-loan-floating",
+  "title": "Housing Loan Agreement",
+  "file": "pdf/home-loan-floating.pdf",
+  "pageCount": 5,
+  "terms": {
+    "lenderName": {
+      "value": "Sunrise Housing Finance Corporation Limited",
+      "pages": [
+        1
+      ]
+    },
+    "principal": {
+      "amount": 4000000,
+      "pages": [
+        1,
+        5
+      ]
+    },
+    "interestRate": {
+      "annualPercent": 8.75,
+      "rateType": "floating",
+      "method": "reducing",
+      "benchmark": "Sunrise Prime Lending Rate (SPLR) minus 2.25%",
+      "pages": [
+        1,
+        5
+      ]
+    },
+    "tenureMonths": {
+      "value": 240,
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "statedEmi": {
+      "amount": 35348.43,
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "processingFee": {
+      "amount": 10000,
+      "percent": null,
+      "resolvedAmount": 10000,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "insurancePremium": {
+      "amount": 45000,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "otherUpfrontCharges": [
+      {
+        "description": "Legal and technical valuation charges",
+        "amount": 3500,
+        "percent": null,
+        "pages": [
+          3,
+          5
+        ]
+      },
+      {
+        "description": "CERSAI registration and stamping charges",
+        "amount": 1200,
+        "percent": null,
+        "pages": [
+          3,
+          5
+        ]
+      }
+    ],
+    "prepaymentCharges": {
+      "amount": 0,
+      "percent": 0,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "latePaymentCharges": {
+      "amount": null,
+      "percent": 24,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "bounceCharges": {
+      "amount": 750,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    }
+  },
+  "risks": [
+    {
+      "category": "unilateral_rate_change",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "category": "security_interest",
+      "pages": [
+        4
+      ]
+    },
+    {
+      "category": "auto_debit_mandate",
+      "pages": [
+        2
+      ]
+    },
+    {
+      "category": "cross_default",
+      "pages": [
+        3
+      ]
+    }
+  ],
+  "absentRisks": [
+    "penal_interest",
+    "broad_data_sharing",
+    "one_sided_termination",
+    "arbitration"
+  ],
+  "computed": {
+    "emi": 35348.43,
+    "totalRepayment": 8483623.2,
+    "totalInterest": 4483623.2,
+    "upfrontCharges": 59700,
+    "netDisbursal": 3940300
+  },
+  "pii": {
+    "name": "Ananya Iyer",
+    "pan": "BQRPI7734K",
+    "aadhaar": "6203 9471 8526",
+    "phone": "+91 76540 09182",
+    "email": "ananya.iyer.demo@example.com",
+    "account": "110022334455",
+    "ifsc": "SNRS0000731",
+    "address": "7B Jacaranda Enclave, Whitefield, Bengaluru 560066"
+  }
+}

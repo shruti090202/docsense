@@ -1,0 +1,20 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# node
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+
+# eval output (reports are committed on purpose; raw runs are not)
+eval/runs/
+
+# ide / os
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

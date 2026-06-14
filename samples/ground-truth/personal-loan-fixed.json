@@ -1,0 +1,149 @@
+{
+  "slug": "personal-loan-fixed",
+  "title": "Personal Loan Agreement",
+  "file": "pdf/personal-loan-fixed.pdf",
+  "pageCount": 5,
+  "terms": {
+    "lenderName": {
+      "value": "Meridian Finance Limited",
+      "pages": [
+        1
+      ]
+    },
+    "principal": {
+      "amount": 500000,
+      "pages": [
+        1,
+        4
+      ]
+    },
+    "interestRate": {
+      "annualPercent": 14,
+      "rateType": "fixed",
+      "method": "reducing",
+      "benchmark": null,
+      "pages": [
+        1,
+        4
+      ]
+    },
+    "tenureMonths": {
+      "value": 36,
+      "pages": [
+        1,
+        2,
+        4
+      ]
+    },
+    "statedEmi": {
+      "amount": 17088.81,
+      "pages": [
+        1,
+        2,
+        4
+      ]
+    },
+    "processingFee": {
+      "amount": null,
+      "percent": 2,
+      "resolvedAmount": 10000,
+      "pages": [
+        2,
+        3,
+        4
+      ]
+    },
+    "insurancePremium": {
+      "amount": 6500,
+      "percent": null,
+      "pages": [
+        3,
+        4
+      ]
+    },
+    "otherUpfrontCharges": [
+      {
+        "description": "GST on processing fee",
+        "amount": 1800,
+        "percent": null,
+        "pages": [
+          3,
+          4
+        ]
+      }
+    ],
+    "prepaymentCharges": {
+      "amount": null,
+      "percent": 4,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "latePaymentCharges": {
+      "amount": null,
+      "percent": 2,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "bounceCharges": {
+      "amount": 500,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    }
+  },
+  "risks": [
+    {
+      "category": "auto_debit_mandate",
+      "pages": [
+        2
+      ]
+    },
+    {
+      "category": "penal_interest",
+      "pages": [
+        3
+      ]
+    },
+    {
+      "category": "arbitration",
+      "pages": [
+        4
+      ]
+    },
+    {
+      "category": "broad_data_sharing",
+      "pages": [
+        3
+      ]
+    }
+  ],
+  "absentRisks": [
+    "unilateral_rate_change",
+    "one_sided_termination",
+    "cross_default",
+    "security_interest"
+  ],
+  "computed": {
+    "emi": 17088.81,
+    "totalRepayment": 615197.16,
+    "totalInterest": 115197.16,
+    "upfrontCharges": 18300,
+    "netDisbursal": 481700
+  },
+  "pii": {
+    "name": "Rohan Mehra",
+    "pan": "AKLPM4821R",
+    "aadhaar": "5318 7204 6912",
+    "phone": "98201 44710",
+    "email": "rohan.mehra.demo@example.com",
+    "account": "30412298765",
+    "ifsc": "MRDN0004521",
+    "address": "14 Lotus Court, Andheri West, Mumbai 400053"
+  }
+}

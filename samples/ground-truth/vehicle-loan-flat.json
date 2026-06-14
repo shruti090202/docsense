@@ -1,0 +1,166 @@
+{
+  "slug": "vehicle-loan-flat",
+  "title": "Vehicle Loan Cum Hypothecation Agreement",
+  "file": "pdf/vehicle-loan-flat.pdf",
+  "pageCount": 5,
+  "terms": {
+    "lenderName": {
+      "value": "Trident Auto Credit Private Limited",
+      "pages": [
+        1
+      ]
+    },
+    "principal": {
+      "amount": 800000,
+      "pages": [
+        1,
+        4
+      ]
+    },
+    "interestRate": {
+      "annualPercent": 9.5,
+      "rateType": "fixed",
+      "method": "flat",
+      "benchmark": null,
+      "pages": [
+        1,
+        5
+      ]
+    },
+    "tenureMonths": {
+      "value": 60,
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "statedEmi": {
+      "amount": 19666.67,
+      "pages": [
+        2,
+        5
+      ]
+    },
+    "processingFee": {
+      "amount": null,
+      "percent": 1,
+      "resolvedAmount": 8000,
+      "pages": [
+        2,
+        3,
+        5
+      ]
+    },
+    "insurancePremium": {
+      "amount": null,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "otherUpfrontCharges": [
+      {
+        "description": "Documentation charges",
+        "amount": 1500,
+        "percent": null,
+        "pages": [
+          3,
+          5
+        ]
+      },
+      {
+        "description": "Stamp duty",
+        "amount": 600,
+        "percent": null,
+        "pages": [
+          3,
+          5
+        ]
+      },
+      {
+        "description": "Hypothecation endorsement charges",
+        "amount": 400,
+        "percent": null,
+        "pages": [
+          3,
+          5
+        ]
+      }
+    ],
+    "prepaymentCharges": {
+      "amount": null,
+      "percent": 5,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "latePaymentCharges": {
+      "amount": null,
+      "percent": 3,
+      "pages": [
+        3,
+        5
+      ]
+    },
+    "bounceCharges": {
+      "amount": 450,
+      "percent": null,
+      "pages": [
+        3,
+        5
+      ]
+    }
+  },
+  "risks": [
+    {
+      "category": "one_sided_termination",
+      "pages": [
+        3
+      ]
+    },
+    {
+      "category": "penal_interest",
+      "pages": [
+        3
+      ]
+    },
+    {
+      "category": "arbitration",
+      "pages": [
+        4
+      ]
+    },
+    {
+      "category": "security_interest",
+      "pages": [
+        3,
+        4
+      ]
+    }
+  ],
+  "absentRisks": [
+    "auto_debit_mandate",
+    "unilateral_rate_change",
+    "broad_data_sharing",
+    "cross_default"
+  ],
+  "computed": {
+    "emi": 19666.67,
+    "totalRepayment": 1180000.2,
+    "totalInterest": 380000.2,
+    "upfrontCharges": 10500,
+    "netDisbursal": 789500
+  },
+  "pii": {
+    "name": "Farhan Qureshi",
+    "pan": "CWEPQ1190L",
+    "aadhaar": "7481 0293 6750",
+    "phone": "9013377645",
+    "email": "farhan.q.demo@example.com",
+    "account": "0987654321098",
+    "ifsc": "TRDT0002210",
+    "address": "221 Sector 15, Dwarka, New Delhi 110078"
+  }
+}
