@@ -6,7 +6,7 @@ export interface ChunkOptions {
   minTokens: number;
 }
 
-export const DEFAULT_CHUNK_OPTIONS: ChunkOptions = { maxTokens: 400, overlapTokens: 60, minTokens: 40 };
+export const DEFAULT_CHUNK_OPTIONS: ChunkOptions = { maxTokens: 400, overlapTokens: 60, minTokens: 15 };
 
 // ~4 characters per token is close enough for English legal text and needs no tokenizer download.
 export function estimateTokens(text: string): number {
@@ -67,7 +67,8 @@ function toSections(lines: Line[], minTokens: number): Section[] {
   }
   if (current.lines.length) sections.push(current);
 
-  // A heading with almost no body (e.g. "ARTICLE III" directly followed by "3.1 Interest") is folded into its successor.
+  // Only heading-only stubs (e.g. "ARTICLE III" directly followed by "3.1 Interest") are folded into their successor;
+  // a short clause with a real sentence keeps its own title so citations stay precise.
   const merged: Section[] = [];
   for (let i = 0; i < sections.length; i++) {
     const s = sections[i]!;

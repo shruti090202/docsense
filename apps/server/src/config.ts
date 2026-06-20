@@ -9,9 +9,12 @@ const EnvSchema = z.object({
 
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_CHAT_MODEL: z.string().default('gemini-3.5-flash-lite'),
-  GEMINI_EXTRACTION_MODEL: z.string().default('gemini-3.8-flash'),
+  GEMINI_EXTRACTION_MODEL: z.string().default('gemini-3.5-flash-lite'),
   GEMINI_EMBEDDING_MODEL: z.string().default('gemini-embedding-001'),
   EMBEDDING_DIMENSIONS: z.coerce.number().int().positive().default(768),
+  GEMINI_CHAT_RPM: z.coerce.number().int().positive().default(15),
+  GEMINI_EMBED_RPM: z.coerce.number().int().positive().default(100),
+  SAMPLES_DIR: z.string().optional(),
 
   MAX_UPLOAD_MB: z.coerce.number().positive().default(10),
   MAX_PAGES: z.coerce.number().int().positive().default(60),

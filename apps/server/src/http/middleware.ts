@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { ErrorRequestHandler, NextFunction, Request, RequestHandler, Response } from 'express';
 import { ZodError, type ZodType } from 'zod';
 import { IngestError } from '../ingest/types.js';
+import { LlmError } from '../llm/types.js';
 import type { Logger } from '../logger.js';
 import { HttpError } from './errors.js';
 
@@ -40,6 +41,12 @@ export function errorHandler(logger: Logger): ErrorRequestHandler {
     }
     if (err instanceof IngestError) {
       res.status(422).json({ error: { code: err.code, message: err.message, requestId } });
+      return;
+    }
+    if (err instanceof LlmError) {
+      const status = err.code === 'RATE_LIMITED' ? 429 : err.code === 'NOT_CONFIGURED' ? 503 : err.code === 'UNAVAILABLE' ? 503 : 502;
+      if (err.retryAfterMs) res.setHeader('retry-after', String(Math.ceil(err.retryAfterMs / 1000)));
+      res.status(status).json({ error: { code: `LLM_${err.code}`, message: err.message, requestId } });
       return;
     }
     if (err instanceof ZodError) {

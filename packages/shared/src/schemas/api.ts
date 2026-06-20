@@ -17,6 +17,14 @@ export const UploadResponseSchema = z.object({
 });
 export type UploadResponse = z.infer<typeof UploadResponseSchema>;
 
+export const SampleInfoSchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  pageCount: z.number().int(),
+  loaded: z.boolean(),
+});
+export type SampleInfo = z.infer<typeof SampleInfoSchema>;
+
 export const DocumentSummarySchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -41,6 +49,8 @@ export type ChatTurn = z.infer<typeof ChatTurnSchema>;
 export const AskRequestSchema = z.object({
   question: z.string().min(1).max(2000),
   history: z.array(ChatTurnSchema).max(20).default([]),
+  // the map returned at upload; lets identifiers typed into a question reuse the same placeholders
+  piiMap: PiiMapSchema.optional(),
 });
 export type AskRequest = z.infer<typeof AskRequestSchema>;
 

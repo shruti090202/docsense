@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const CitationSchema = z.object({
+  // marker number used in the answer text, e.g. [2]; absent for extraction/risk citations
+  ref: z.number().int().positive().optional(),
   chunkId: z.string(),
   page: z.number().int().positive(),
   clauseTitle: z.string().nullable(),

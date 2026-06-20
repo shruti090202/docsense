@@ -36,7 +36,7 @@ describe('POST /api/documents', () => {
       .expect(201);
 
     expect(res.body.pageCount).toBe(truth.pageCount);
-    expect(res.body.status).toBe('parsed');
+    expect(res.body.status).toBe('embedded');
     expect(res.body.chunkCount).toBeGreaterThan(8);
     expect(Object.values(res.body.piiMap)).toContain(truth.pii.pan);
     expect(res.headers['x-request-id']).toBeTruthy();

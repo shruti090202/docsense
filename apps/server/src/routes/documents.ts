@@ -7,7 +7,9 @@ import type { DocumentRepository, DocumentRow } from '../db/documents.js';
 import { badRequest, notFound } from '../http/errors.js';
 import { ingest } from '../ingest/pipeline.js';
 import { IngestError } from '../ingest/types.js';
+import { LlmError } from '../llm/types.js';
 import type { Logger } from '../logger.js';
+import type { EmbeddingService } from '../retrieval/embeddings.js';
 
 const IdParam = z.object({ id: z.string().uuid() });
 const ChunkParams = z.object({ id: z.string().uuid(), chunkId: z.string().uuid() });
@@ -28,8 +30,13 @@ export function toSummary(row: DocumentRow): DocumentSummary {
   };
 }
 
-export function documentsRouter(deps: { config: Config; documents: DocumentRepository; logger: Logger }): Router {
-  const { config, documents, logger } = deps;
+export function documentsRouter(deps: {
+  config: Config;
+  documents: DocumentRepository;
+  embeddings: EmbeddingService;
+  logger: Logger;
+}): Router {
+  const { config, documents, embeddings, logger } = deps;
   const router = Router();
 
   const upload = multer({
@@ -53,7 +60,7 @@ export function documentsRouter(deps: { config: Config; documents: DocumentRepos
         { buffer: req.file.buffer, mimeType: req.file.mimetype, fileName: req.file.originalname },
         { maxPages: config.MAX_PAGES },
       );
-      const row = await documents.createWithChunks(
+      let row = await documents.createWithChunks(
         {
           title: result.title,
           sourceType: result.sourceType,
@@ -63,6 +70,16 @@ export function documentsRouter(deps: { config: Config; documents: DocumentRepos
         },
         result.chunks,
       );
+      // Embedding is best-effort here: a quota error leaves the document 'parsed' and /ask retries later.
+      const warnings = [...result.warnings];
+      try {
+        await embeddings.embedDocument(row.id);
+        row = (await documents.findById(row.id)) ?? row;
+      } catch (err) {
+        if (!(err instanceof LlmError)) throw err;
+        logger.warn({ documentId: row.id, code: err.code, err: err.message }, 'embedding deferred');
+        warnings.push('Embeddings could not be generated right now; questions will retry automatically.');
+      }
       logger.info(
         {
           requestId: req.requestId,
@@ -70,6 +87,7 @@ export function documentsRouter(deps: { config: Config; documents: DocumentRepos
           pages: result.pageCount,
           chunks: result.chunks.length,
           pii: result.piiCounts,
+          status: row.status,
           ms: Date.now() - started,
         },
         'document ingested',
@@ -82,7 +100,7 @@ export function documentsRouter(deps: { config: Config; documents: DocumentRepos
         chunkCount: row.chunk_count,
         status: row.status,
         piiMap: result.piiMap,
-        warnings: result.warnings,
+        warnings,
       };
       res.status(201).json(body);
     } catch (err) {

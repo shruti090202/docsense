@@ -4,6 +4,7 @@ import type { Express } from 'express';
 import { createApp } from '../../src/app.js';
 import { loadConfig, type Config } from '../../src/config.js';
 import { createPool, type Db } from '../../src/db/pool.js';
+import { FakeLlmClient } from '../../src/llm/fake.js';
 import { createLogger } from '../../src/logger.js';
 
 export const samplesDir = path.resolve(import.meta.dirname, '../../../../samples');
@@ -15,6 +16,7 @@ export interface TestContext {
   app: Express;
   db: Db;
   config: Config;
+  llm: FakeLlmClient;
   close: () => Promise<void>;
 }
 
@@ -34,11 +36,13 @@ export async function createTestContext(overrides: Partial<Config> = {}): Promis
   const config = testConfig(overrides);
   const db = createPool(config.DATABASE_URL);
   const logger = createLogger('silent');
-  const app = createApp({ config, db, logger, version: 'test' });
-  return { app, db, config, close: () => db.end() };
+  const llm = new FakeLlmClient();
+  const app = createApp({ config, db, logger, version: 'test', llm });
+  return { app, db, config, llm, close: () => db.end() };
 }
 
 export async function truncateAll(db: Db): Promise<void> {
   await db.query('TRUNCATE documents CASCADE');
   await db.query('TRUNCATE embedding_cache');
+  await db.query('TRUNCATE qa_cache');
 }
