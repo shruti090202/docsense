@@ -41,4 +41,4 @@ jobs:
       - name: verify committed samples are reproducible
         run: |
           npm run samples:generate
-          git diff --exit-code -- samples/ground-truth samples/index.json
+          git diff --exit-code -- samples/pdf samples/ground-truth samples/index.json

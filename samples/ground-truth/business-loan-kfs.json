@@ -142,7 +142,9 @@
     "totalRepayment": 3400833.6,
     "totalInterest": 900833.6,
     "upfrontCharges": 85500,
-    "netDisbursal": 2414500
+    "netDisbursal": 2414500,
+    "effectiveAnnualRatePercent": 19.49,
+    "aprPercent": 17.94
   },
   "pii": {
     "name": "Priya Venkatesan (Proprietor, Venkatesan Textiles)",

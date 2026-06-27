@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { AskResponse, ChatTurn, PiiMap } from '@docsense/shared';
+import type { AskResponse, ChatTurn, PiiMap, ToolCallRecord } from '@docsense/shared';
 import type { Config } from '../config.js';
 import type { DocumentRepository, DocumentRow } from '../db/documents.js';
 import type { Db } from '../db/pool.js';
@@ -11,6 +11,9 @@ import type { EmbeddingService } from '../retrieval/embeddings.js';
 import type { HybridSearch, RetrievedChunk } from '../retrieval/search.js';
 import { parseAnswer } from './citations.js';
 import { QA_SYSTEM_PROMPT, formatContext, formatQuestion } from './prompt.js';
+import { TOOL_DEFINITIONS, executeTool } from './tools.js';
+
+const MAX_TOOL_ROUNDS = 4;
 
 export interface AskInput {
   documentId: string;
@@ -52,6 +55,30 @@ export class QaService {
     });
   }
 
+  // Function-calling loop: the model requests calculator tools, the server runs them deterministically,
+  // and the model gets the results back until it produces a final text answer.
+  private async runWithTools(messages: Message[]): Promise<{ text: string | null; toolCalls: ToolCallRecord[]; usage: { inputTokens: number; outputTokens: number } }> {
+    const { llm, logger } = this.deps;
+    const toolCalls: ToolCallRecord[] = [];
+    const usage = { inputTokens: 0, outputTokens: 0 };
+    const conversation = [...messages];
+    for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+      const res = await llm.generate({ system: QA_SYSTEM_PROMPT, messages: conversation, tools: TOOL_DEFINITIONS, temperature: 0.1 });
+      usage.inputTokens += res.usage.inputTokens;
+      usage.outputTokens += res.usage.outputTokens;
+      if (res.functionCalls.length === 0) return { text: res.text, toolCalls, usage };
+      conversation.push({ role: 'model', parts: res.parts });
+      const responses = res.functionCalls.map((call) => {
+        const result = executeTool(call.name, call.args);
+        toolCalls.push({ name: call.name, args: call.args, result });
+        logger.info({ tool: call.name, args: call.args, result }, 'tool executed');
+        return { functionResponse: { name: call.name, response: result, ...(call.id ? { id: call.id } : {}) } };
+      });
+      conversation.push({ role: 'user', parts: responses });
+    }
+    throw new HttpError(502, 'LLM_TOOL_LOOP', 'The model kept requesting calculations without answering');
+  }
+
   async ask(input: AskInput): Promise<AskResponse> {
     const { db, config, llm, documents, logger } = this.deps;
     const doc = await documents.findById(input.documentId);
@@ -82,18 +109,19 @@ export class QaService {
       { role: 'user', parts: [{ text: formatQuestion(formatContext(chunks), question) }] },
     ];
     const started = Date.now();
-    const res = await llm.generate({ system: QA_SYSTEM_PROMPT, messages, temperature: 0.1 });
-    if (!res.text) throw new HttpError(502, 'LLM_EMPTY', 'The model returned no answer');
-    const parsed = parseAnswer(res.text, chunks);
+    const { text, toolCalls, usage } = await this.runWithTools(messages);
+    if (!text) throw new HttpError(502, 'LLM_EMPTY', 'The model returned no answer');
+    const parsed = parseAnswer(text, chunks);
     const response: AskResponse = {
       answer: parsed.answer,
       citations: parsed.citations,
-      toolCalls: [],
-      grounded: parsed.grounded,
+      toolCalls,
+      // an answer built on tool output is grounded even when it cites no passage explicitly
+      grounded: parsed.grounded || (toolCalls.length > 0 && !parsed.notFound),
       cached: false,
     };
     logger.info(
-      { documentId: doc.id, ms: Date.now() - started, retrieved: chunks.length, citations: parsed.citations.length, notFound: parsed.notFound, usage: res.usage },
+      { documentId: doc.id, ms: Date.now() - started, retrieved: chunks.length, citations: parsed.citations.length, toolCalls: toolCalls.length, notFound: parsed.notFound, usage },
       'question answered',
     );
     if (cacheKey) {

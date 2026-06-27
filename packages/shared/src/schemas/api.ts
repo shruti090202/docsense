@@ -25,6 +25,26 @@ export const SampleInfoSchema = z.object({
 });
 export type SampleInfo = z.infer<typeof SampleInfoSchema>;
 
+export const CostSummarySchema = z.object({
+  emi: z.number(),
+  tenureMonths: z.number().int(),
+  totalRepayment: z.number(),
+  totalInterest: z.number(),
+  upfrontFees: z.number(),
+  netDisbursal: z.number(),
+  totalCostOfCredit: z.number(),
+  effectiveAnnualRatePercent: z.number(),
+  aprPercent: z.number(),
+});
+export type CostSummary = z.infer<typeof CostSummarySchema>;
+
+export const CostResponseSchema = z.object({
+  cost: CostSummarySchema.nullable(),
+  upfrontBreakdown: z.array(z.object({ label: z.string(), amount: z.number() })),
+  missing: z.array(z.string()),
+});
+export type CostResponse = z.infer<typeof CostResponseSchema>;
+
 export const DocumentSummarySchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -35,6 +55,7 @@ export const DocumentSummarySchema = z.object({
   isSample: z.boolean(),
   extraction: LoanTermsSchema.nullable(),
   riskFlags: z.array(RiskFlagSchema).nullable(),
+  cost: CostResponseSchema.nullable(),
   createdAt: z.string(),
   expiresAt: z.string(),
 });
@@ -69,6 +90,38 @@ export const AskResponseSchema = z.object({
   cached: z.boolean(),
 });
 export type AskResponse = z.infer<typeof AskResponseSchema>;
+
+export const CompareRequestSchema = z.object({
+  leftId: z.string().uuid(),
+  rightId: z.string().uuid(),
+});
+export type CompareRequest = z.infer<typeof CompareRequestSchema>;
+
+export const CompareDifferenceSchema = z.object({
+  aspect: z.string(),
+  left: z.string(),
+  right: z.string(),
+  favours: z.enum(['left', 'right', 'neither']),
+  note: z.string(),
+});
+export type CompareDifference = z.infer<typeof CompareDifferenceSchema>;
+
+export const CompareSideSchema = z.object({
+  documentId: z.string().uuid(),
+  title: z.string(),
+  terms: LoanTermsSchema,
+  cost: CostResponseSchema,
+  riskFlags: z.array(RiskFlagSchema).nullable(),
+});
+
+export const CompareResponseSchema = z.object({
+  left: CompareSideSchema,
+  right: CompareSideSchema,
+  summary: z.string(),
+  differences: z.array(CompareDifferenceSchema),
+  cheaper: z.enum(['left', 'right', 'unknown']),
+});
+export type CompareResponse = z.infer<typeof CompareResponseSchema>;
 
 export const ApiErrorSchema = z.object({
   error: z.object({

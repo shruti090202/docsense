@@ -121,7 +121,9 @@
     "totalRepayment": 1739220,
     "totalInterest": 539220,
     "upfrontCharges": 4200,
-    "netDisbursal": 1195800
+    "netDisbursal": 1195800,
+    "effectiveAnnualRatePercent": 11.98,
+    "aprPercent": 11.36
   },
   "pii": {
     "name": "Devika Nair",

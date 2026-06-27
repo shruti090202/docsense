@@ -140,7 +140,9 @@
     "totalRepayment": 8483623.2,
     "totalInterest": 4483623.2,
     "upfrontCharges": 59700,
-    "netDisbursal": 3940300
+    "netDisbursal": 3940300,
+    "effectiveAnnualRatePercent": 9.34,
+    "aprPercent": 8.96
   },
   "pii": {
     "name": "Ananya Iyer",

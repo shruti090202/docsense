@@ -42,6 +42,9 @@ export async function renderPdf(blocks: Block[], meta: { title: string; author: 
   doc.setTitle(meta.title);
   doc.setAuthor(meta.author);
   doc.setProducer('DocSense sample generator');
+  // fixed dates keep the committed PDFs byte-for-byte reproducible
+  doc.setCreationDate(new Date('2026-01-01T00:00:00Z'));
+  doc.setModificationDate(new Date('2026-01-01T00:00:00Z'));
   const regular = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
   const width = PAGE_W - MARGIN * 2;

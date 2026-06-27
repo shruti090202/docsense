@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
-import type { DocumentSummary, UploadResponse } from '@docsense/shared';
+import { costFromTerms, type DocumentSummary, type UploadResponse } from '@docsense/shared';
 import type { Config } from '../config.js';
 import type { DocumentRepository, DocumentRow } from '../db/documents.js';
 import { badRequest, notFound } from '../http/errors.js';
@@ -25,6 +25,7 @@ export function toSummary(row: DocumentRow): DocumentSummary {
     isSample: row.is_sample,
     extraction: row.extraction,
     riskFlags: row.risk_flags,
+    cost: row.extraction ? costFromTerms(row.extraction) : null,
     createdAt: row.created_at.toISOString(),
     expiresAt: row.expires_at.toISOString(),
   };

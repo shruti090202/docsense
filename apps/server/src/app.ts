@@ -4,9 +4,11 @@ import express, { type Express } from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
+import { CompareService } from './compare/service.js';
 import type { Config } from './config.js';
 import { DocumentRepository } from './db/documents.js';
 import type { Db } from './db/pool.js';
+import { ExtractionService } from './extraction/service.js';
 import { errorHandler, requestId } from './http/middleware.js';
 import { GeminiClient } from './llm/gemini.js';
 import type { LlmClient } from './llm/types.js';
@@ -15,6 +17,8 @@ import type { Logger } from './logger.js';
 import { QaService } from './qa/service.js';
 import { EmbeddingService } from './retrieval/embeddings.js';
 import { HybridSearch } from './retrieval/search.js';
+import { RiskService } from './risks/service.js';
+import { analysisRouter } from './routes/analysis.js';
 import { documentsRouter } from './routes/documents.js';
 import { healthRouter } from './routes/health.js';
 import { internalRouter } from './routes/internal.js';
@@ -54,6 +58,9 @@ export function createApp(deps: AppDeps): Express {
   const embeddings = new EmbeddingService(db, llm, logger);
   const search = new HybridSearch(db, embeddings);
   const qa = new QaService({ db, config, llm, documents, embeddings, search, logger });
+  const extraction = new ExtractionService({ db, llm, documents, search, logger, extractionModel: config.GEMINI_EXTRACTION_MODEL });
+  const risks = new RiskService({ db, llm, documents, logger });
+  const compare = new CompareService({ llm, documents, extraction, logger });
   const samplesDir = config.SAMPLES_DIR ?? path.resolve(import.meta.dirname, '../../../samples');
   const samples = new SampleService(samplesDir, documents, embeddings, logger);
 
@@ -87,9 +94,10 @@ export function createApp(deps: AppDeps): Express {
 
   app.use(healthRouter({ config, db, version: deps.version ?? 'dev' }));
   app.use('/api', limiter(config.RATE_LIMIT_MAX));
-  app.use('/api/documents/:id/ask', llmLimiter);
+  for (const route of ['/api/documents/:id/ask', '/api/documents/:id/extract', '/api/documents/:id/risks', '/api/compare']) app.use(route, llmLimiter);
   app.use('/api/documents', documentsRouter({ config, documents, embeddings, logger }));
   app.use('/api/documents', qaRouter({ qa, documents, embeddings }));
+  app.use('/api', analysisRouter({ documents, qa, extraction, risks, compare }));
   app.use('/api/samples', samplesRouter({ samples }));
   app.use('/internal', internalRouter({ config, documents, logger }));
 

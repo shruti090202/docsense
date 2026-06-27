@@ -16,6 +16,9 @@ export function estimateTokens(text: string): number {
 const NUMBERED = /^\s*(\d{1,2}(?:\.\d{1,2}){0,3})[.)]?\s+([A-Z][^\n]{2,79})$/;
 const KEYWORD = /^\s*(ARTICLE|CLAUSE|SECTION|SCHEDULE|ANNEXURE|ANNEX|PART|CHAPTER)\s+(\d+|[IVXLC]+|[A-Z])\b[^\n]{0,70}$/i;
 const ALL_CAPS = /^[A-Z0-9][A-Z0-9 ,&/()'-]{3,79}$/;
+// Sentence boundary: terminal punctuation, whitespace, then a capital/digit; abbreviations such as
+// "Rs. 5,00,000", "No. 4" or "Pvt. Ltd." do not end a sentence.
+export const SENTENCE_BOUNDARY = /(?<=(?<!\b(?:Rs|No|Mr|Ms|Mrs|Dr|Sr|Jr|vs|Ltd|Pvt|Inc|Co))[.;:])\s+(?=[A-Z0-9(\[])/;
 
 export function isHeading(line: string): boolean {
   const t = line.trim();
@@ -93,7 +96,7 @@ interface Segment {
 function toSegments(lines: Line[]): Segment[] {
   const segments: Segment[] = [];
   for (const line of lines) {
-    const parts = line.text.split(/(?<=[.;:])\s+(?=[A-Z0-9(])/);
+    const parts = line.text.split(SENTENCE_BOUNDARY);
     for (const part of parts) if (part.trim()) segments.push({ text: part.trim(), page: line.page });
   }
   return segments;

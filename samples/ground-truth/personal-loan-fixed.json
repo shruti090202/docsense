@@ -134,7 +134,9 @@
     "totalRepayment": 615197.16,
     "totalInterest": 115197.16,
     "upfrontCharges": 18300,
-    "netDisbursal": 481700
+    "netDisbursal": 481700,
+    "effectiveAnnualRatePercent": 17.97,
+    "aprPercent": 16.64
   },
   "pii": {
     "name": "Rohan Mehra",

@@ -1,8 +1,9 @@
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
-import { round2, verhoeffGenerate } from '@docsense/shared';
+import { loanCost, round2, verhoeffGenerate } from '@docsense/shared';
 import { buildBlocks, statedEmi } from './content.js';
 import { renderPdf, type Block } from './render.js';
 import { SAMPLES, type SampleSpec } from './spec.js';
@@ -55,7 +56,15 @@ function groundTruth(spec: SampleSpec, pageCount: number, tagPages: Record<strin
     },
     risks: spec.risks.map((category) => ({ category, pages: pagesFor(tagPages, `risk:${category}`) })),
     absentRisks: (['auto_debit_mandate', 'penal_interest', 'unilateral_rate_change', 'broad_data_sharing', 'one_sided_termination', 'arbitration', 'cross_default', 'security_interest'] as const).filter((r) => !spec.risks.includes(r)),
-    computed: { emi, totalRepayment, totalInterest: round2(totalRepayment - spec.principal), upfrontCharges: round2(upfront), netDisbursal: round2(spec.principal - upfront) },
+    computed: {
+      emi,
+      totalRepayment,
+      totalInterest: round2(totalRepayment - spec.principal),
+      upfrontCharges: round2(upfront),
+      netDisbursal: round2(spec.principal - upfront),
+      effectiveAnnualRatePercent: loanCost({ principal: spec.principal, annualRatePercent: spec.annualRate, tenureMonths: spec.tenureMonths, method: spec.method, upfrontFees: upfront, statedEmi: emi }).effectiveAnnualRatePercent,
+      aprPercent: loanCost({ principal: spec.principal, annualRatePercent: spec.annualRate, tenureMonths: spec.tenureMonths, method: spec.method, upfrontFees: upfront, statedEmi: emi }).aprPercent,
+    },
     pii: { ...spec.borrower },
   };
 }
@@ -83,7 +92,9 @@ async function main() {
     await writeFile(path.join(root, 'pdf', `${spec.slug}.pdf`), pdf.bytes);
     const truth = groundTruth(spec, pdf.pageCount, pdf.tagPages);
     await writeFile(path.join(root, 'ground-truth', `${spec.slug}.json`), JSON.stringify(truth, null, 2) + '\n');
-    if (i === 0) await writeFile(path.join(root, 'docx', `${spec.slug}.docx`), await renderDocx(blocks, spec.title));
+    // the docx library stamps the current time, so the DOCX is only written when missing
+    const docxPath = path.join(root, 'docx', `${spec.slug}.docx`);
+    if (i === 0 && !existsSync(docxPath)) await writeFile(docxPath, await renderDocx(blocks, spec.title));
     index.push({ slug: spec.slug, title: `${spec.lenderShort} ${spec.title}`, file: truth.file, pageCount: pdf.pageCount });
     console.log(`${spec.slug}: ${pdf.pageCount} pages`);
   }

@@ -151,7 +151,9 @@
     "totalRepayment": 1180000.2,
     "totalInterest": 380000.2,
     "upfrontCharges": 10500,
-    "netDisbursal": 789500
+    "netDisbursal": 789500,
+    "effectiveAnnualRatePercent": 18.51,
+    "aprPercent": 17.11
   },
   "pii": {
     "name": "Farhan Qureshi",

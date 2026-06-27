@@ -1,4 +1,5 @@
 import type { Citation } from '@docsense/shared';
+import { SENTENCE_BOUNDARY } from '../ingest/chunker.js';
 import type { RetrievedChunk } from '../retrieval/search.js';
 import { NOT_IN_DOCUMENT } from './prompt.js';
 
@@ -9,9 +10,10 @@ export interface ParsedAnswer {
   notFound: boolean;
 }
 
-function firstSentence(text: string, max = 220): string {
+// First sentence of a chunk body (after the clause title line), used as the human-readable quote.
+export function quoteFrom(text: string, max = 220): string {
   const body = text.includes('\n') ? text.slice(text.indexOf('\n') + 1) : text;
-  const m = /^(.{20,}?[.;:])\s/.exec(body);
+  const m = new RegExp(`^(.{20,}?)${SENTENCE_BOUNDARY.source}`).exec(body);
   const s = (m ? m[1]! : body).trim();
   return s.length > max ? `${s.slice(0, max - 1)}…` : s;
 }
@@ -42,7 +44,7 @@ export function parseAnswer(raw: string, chunks: RetrievedChunk[]): ParsedAnswer
     .sort((a, b) => a - b)
     .map((n) => {
       const c = chunks[n - 1]!;
-      return { ref: n, chunkId: c.id, page: c.page_start, clauseTitle: c.clause_title, quote: firstSentence(c.content) };
+      return { ref: n, chunkId: c.id, page: c.page_start, pageEnd: c.page_end, clauseTitle: c.clause_title, quote: quoteFrom(c.content) };
     });
   const cleaned = answer.replace(/ {2,}/g, ' ').replace(/\s+([.,;])/g, '$1').trim();
   return { answer: cleaned, citations, grounded: citations.length > 0, notFound: false };

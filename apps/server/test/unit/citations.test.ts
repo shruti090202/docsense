@@ -28,8 +28,8 @@ describe('parseAnswer', () => {
     expect(r.grounded).toBe(true);
     expect(r.notFound).toBe(false);
     expect(r.citations).toEqual([
-      { ref: 1, chunkId: 'chunk-1', page: 1, clauseTitle: '1. CLAUSE', quote: 'The Borrower shall pay a processing fee of 2% of the loan amount.' },
-      { ref: 2, chunkId: 'chunk-2', page: 2, clauseTitle: '2. CLAUSE', quote: 'Prepayment charge of 4% applies after the twelfth EMI;' },
+      { ref: 1, chunkId: 'chunk-1', page: 1, pageEnd: 1, clauseTitle: '1. CLAUSE', quote: 'The Borrower shall pay a processing fee of 2% of the loan amount.' },
+      { ref: 2, chunkId: 'chunk-2', page: 2, pageEnd: 2, clauseTitle: '2. CLAUSE', quote: 'Prepayment charge of 4% applies after the twelfth EMI; no prepayment is permitted before that.' },
     ]);
     expect(r.answer).toBe('The processing fee is 2% [1] and prepayment costs 4% [2].');
   });
@@ -59,6 +59,11 @@ describe('parseAnswer', () => {
     expect(r.citations).toEqual([]);
     expect(r.answer).toBe('The agreement does not mention a cooling-off period.');
     expect(parseAnswer('NOT_IN_DOCUMENT', chunks).answer).toBe('The document does not appear to state this.');
+  });
+
+  it('does not treat "Rs." as the end of a sentence', () => {
+    const r = parseAnswer('x [1]', [chunk(1, 'B. LOAN\nThe loan amount is Rs. 5,00,000. Processing fee 2%.')]);
+    expect(r.citations[0]!.quote).toBe('The loan amount is Rs. 5,00,000.');
   });
 
   it('falls back to the start of a chunk when there is no sentence boundary', () => {

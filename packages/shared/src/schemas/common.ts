@@ -5,6 +5,8 @@ export const CitationSchema = z.object({
   ref: z.number().int().positive().optional(),
   chunkId: z.string(),
   page: z.number().int().positive(),
+  // last page of the cited chunk when it crosses a page break
+  pageEnd: z.number().int().positive().optional(),
   clauseTitle: z.string().nullable(),
   quote: z.string(),
 });
