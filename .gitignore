@@ -18,3 +18,6 @@ eval/runs/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# copied from samples/pdf by apps/web/scripts/copy-samples.mjs
+apps/web/public/samples/

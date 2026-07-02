@@ -4,8 +4,15 @@
   "version": "2.0.0",
   "description": "Loan and contract intelligence: cited Q&A, structured term extraction, true-cost calculators and risk flags for loan agreements.",
   "license": "MIT",
-  "engines": { "node": ">=20.19.0" },
-  "workspaces": ["packages/*", "apps/*", "eval", "samples"],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "eval",
+    "samples"
+  ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -15,5 +22,11 @@
     "dev:web": "npm run dev -w apps/web",
     "migrate": "npm run migrate -w apps/server",
     "samples:generate": "npm run generate -w samples"
+  },
+  "overrides": {
+    "jsdom": "26.1.0"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
   }
 }
