@@ -1,0 +1,23 @@
+{
+  "slug": "lecture-notes-tvm",
+  "title": "Lecture Notes: Time Value of Money and Loan Amortisation",
+  "kind": "general",
+  "file": "pdf/lecture-notes-tvm.pdf",
+  "pageCount": 2,
+  "outlineHeadings": [
+    "Why money has a time value",
+    "Annuities",
+    "The EMI formula",
+    "Building an amortisation schedule",
+    "Nominal versus effective rates",
+    "Summary and reading",
+    "Practice questions"
+  ],
+  "facts": {
+    "scholarshipPv": 39927,
+    "exampleEmi": 21247,
+    "nominalToEar": "12% monthly -> 12.68%"
+  },
+  "tagPages": {},
+  "pii": {}
+}

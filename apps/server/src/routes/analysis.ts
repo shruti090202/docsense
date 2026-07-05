@@ -1,8 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { CompareRequestSchema, costFromTerms } from '@docsense/shared';
+import { CompareRequestSchema, costFromTerms, type AnalysisResponse } from '@docsense/shared';
 import type { CompareService } from '../compare/service.js';
 import type { DocumentRepository } from '../db/documents.js';
+import type { ContractFactsService } from '../extraction/contractFacts.js';
+import type { OutlineService } from '../extraction/outline.js';
 import { ExtractionService, ForceQuery } from '../extraction/service.js';
 import { notFound } from '../http/errors.js';
 import { validateBody } from '../http/middleware.js';
@@ -15,11 +17,14 @@ export function analysisRouter(deps: {
   documents: DocumentRepository;
   qa: QaService;
   extraction: ExtractionService;
+  contractFacts: ContractFactsService;
+  outline: OutlineService;
   risks: RiskService;
   compare: CompareService;
 }): Router {
   const router = Router();
 
+  // One endpoint, three shapes: the document's kind decides which analysis runs.
   router.post('/documents/:id/extract', async (req, res, next) => {
     try {
       const { id } = IdParam.parse(req.params);
@@ -27,8 +32,17 @@ export function analysisRouter(deps: {
       const doc = await deps.documents.findById(id);
       if (!doc) throw notFound('Document not found or expired');
       await deps.qa.ensureEmbedded(doc);
-      const terms = await deps.extraction.extract(doc, { force: force !== undefined });
-      res.json({ terms, cost: costFromTerms(terms) });
+      const opts = { force: force !== undefined };
+      const body: AnalysisResponse = { kind: doc.kind, terms: null, cost: null, contractFacts: null, outline: null };
+      if (doc.kind === 'loan') {
+        body.terms = await deps.extraction.extract(doc, opts);
+        body.cost = costFromTerms(body.terms);
+      } else if (doc.kind === 'contract') {
+        body.contractFacts = await deps.contractFacts.extract(doc, opts);
+      } else {
+        body.outline = await deps.outline.build(doc, opts);
+      }
+      res.json(body);
     } catch (err) {
       next(err);
     }

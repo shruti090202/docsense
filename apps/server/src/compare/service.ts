@@ -60,6 +60,7 @@ export class CompareService {
     if (leftId === rightId) throw badRequest('SAME_DOCUMENT', 'Choose two different documents to compare');
     const [left, right] = await Promise.all([this.deps.documents.findById(leftId), this.deps.documents.findById(rightId)]);
     if (!left || !right) throw notFound('One of the documents was not found or has expired');
+    if (left.kind !== 'loan' || right.kind !== 'loan') throw badRequest('KIND_NOT_SUPPORTED', 'Comparison needs two loan agreements; other documents have no cost model to compare');
     const leftTerms = await this.deps.extraction.extract(left);
     const rightTerms = await this.deps.extraction.extract(right);
     const leftCost = costFromTerms(leftTerms);

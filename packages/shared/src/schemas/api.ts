@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { CitationSchema, PiiMapSchema, SourceTypeSchema } from './common.js';
-import { LoanTermsSchema, RiskFlagSchema } from './loanTerms.js';
+import { ContractFactsSchema, DocumentKindSchema, LoanTermsSchema, OutlineSchema, RiskFlagSchema } from './loanTerms.js';
 
 export const DocumentStatusSchema = z.enum(['parsed', 'embedded', 'failed']);
 export type DocumentStatus = z.infer<typeof DocumentStatusSchema>;
@@ -9,6 +9,7 @@ export const UploadResponseSchema = z.object({
   documentId: z.string().uuid(),
   title: z.string(),
   sourceType: SourceTypeSchema,
+  kind: DocumentKindSchema,
   pageCount: z.number().int(),
   chunkCount: z.number().int(),
   status: DocumentStatusSchema,
@@ -20,6 +21,7 @@ export type UploadResponse = z.infer<typeof UploadResponseSchema>;
 export const SampleInfoSchema = z.object({
   slug: z.string(),
   title: z.string(),
+  kind: DocumentKindSchema,
   pageCount: z.number().int(),
   loaded: z.boolean(),
 });
@@ -49,11 +51,14 @@ export const DocumentSummarySchema = z.object({
   id: z.string().uuid(),
   title: z.string(),
   sourceType: SourceTypeSchema,
+  kind: DocumentKindSchema,
   pageCount: z.number().int(),
   chunkCount: z.number().int(),
   status: DocumentStatusSchema,
   isSample: z.boolean(),
   extraction: LoanTermsSchema.nullable(),
+  contractFacts: ContractFactsSchema.nullable(),
+  outline: OutlineSchema.nullable(),
   riskFlags: z.array(RiskFlagSchema).nullable(),
   cost: CostResponseSchema.nullable(),
   createdAt: z.string(),
@@ -90,6 +95,16 @@ export const AskResponseSchema = z.object({
   cached: z.boolean(),
 });
 export type AskResponse = z.infer<typeof AskResponseSchema>;
+
+// What /extract returns: the kind decides which of the analyses is populated.
+export const AnalysisResponseSchema = z.object({
+  kind: DocumentKindSchema,
+  terms: LoanTermsSchema.nullable(),
+  cost: CostResponseSchema.nullable(),
+  contractFacts: ContractFactsSchema.nullable(),
+  outline: OutlineSchema.nullable(),
+});
+export type AnalysisResponse = z.infer<typeof AnalysisResponseSchema>;
 
 export const CompareRequestSchema = z.object({
   leftId: z.string().uuid(),

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 import { loanCost, round2, verhoeffGenerate } from '@docsense/shared';
 import { buildBlocks, statedEmi } from './content.js';
+import { EXTRA_SAMPLES } from './extraSamples.js';
 import { renderPdf, type Block } from './render.js';
 import { SAMPLES, type SampleSpec } from './spec.js';
 
@@ -84,7 +85,7 @@ async function renderDocx(blocks: Block[], title: string): Promise<Buffer> {
 
 async function main() {
   await Promise.all(['pdf', 'docx', 'ground-truth'].map((d) => mkdir(path.join(root, d), { recursive: true })));
-  const index: { slug: string; title: string; file: string; pageCount: number }[] = [];
+  const index: { slug: string; title: string; kind: string; file: string; pageCount: number }[] = [];
   for (const [i, raw] of SAMPLES.entries()) {
     const spec = withAadhaar(raw, i);
     const blocks = buildBlocks(spec);
@@ -95,8 +96,18 @@ async function main() {
     // the docx library stamps the current time, so the DOCX is only written when missing
     const docxPath = path.join(root, 'docx', `${spec.slug}.docx`);
     if (i === 0 && !existsSync(docxPath)) await writeFile(docxPath, await renderDocx(blocks, spec.title));
-    index.push({ slug: spec.slug, title: `${spec.lenderShort} ${spec.title}`, file: truth.file, pageCount: pdf.pageCount });
+    index.push({ slug: spec.slug, title: `${spec.lenderShort} ${spec.title}`, kind: 'loan', file: truth.file, pageCount: pdf.pageCount });
     console.log(`${spec.slug}: ${pdf.pageCount} pages`);
+  }
+  for (const extra of EXTRA_SAMPLES) {
+    const pdf = await renderPdf(extra.blocks, { title: extra.title, author: 'DocSense samples' });
+    await writeFile(path.join(root, 'pdf', `${extra.slug}.pdf`), pdf.bytes);
+    const pagesFor = (tag: string) => [...(pdf.tagPages[tag] ?? [])].sort((a, b) => a - b);
+    const tagged = Object.fromEntries(Object.keys(pdf.tagPages).map((t) => [t, pagesFor(t)]));
+    const truth = { slug: extra.slug, title: extra.title, kind: extra.kind, file: `pdf/${extra.slug}.pdf`, pageCount: pdf.pageCount, ...extra.truth, tagPages: tagged, pii: extra.pii };
+    await writeFile(path.join(root, 'ground-truth', `${extra.slug}.json`), JSON.stringify(truth, null, 2) + '\n');
+    index.push({ slug: extra.slug, title: extra.shortTitle, kind: extra.kind, file: truth.file, pageCount: pdf.pageCount });
+    console.log(`${extra.slug}: ${pdf.pageCount} pages`);
   }
   await writeFile(path.join(root, 'index.json'), JSON.stringify(index, null, 2) + '\n');
 }

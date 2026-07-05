@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
-import type { PiiMap, PiiType, SourceType } from '@docsense/shared';
+import type { DocumentKind, PiiMap, PiiType, SourceType } from '@docsense/shared';
 import { PiiMasker } from '../privacy/pii.js';
 import { chunkDocument, type ChunkOptions } from './chunker.js';
+import { classifyDocument } from './classify.js';
 import { parseDocx } from './docx.js';
 import { parsePdf } from './pdf.js';
 import { IngestError, type Chunk, type ParsedDocument } from './types.js';
@@ -19,6 +20,7 @@ export interface IngestOptions {
 
 export interface IngestResult {
   sourceType: SourceType;
+  kind: DocumentKind;
   title: string;
   pageCount: number;
   contentHash: string;
@@ -69,8 +71,10 @@ export async function ingest(input: IngestInput, opts: IngestOptions): Promise<I
   const parsed = await parseUpload(input, opts);
   const { chunks, piiMap, piiCounts, contentHash } = maskAndChunk(parsed, opts.chunk);
   if (chunks.length === 0) throw new IngestError('EMPTY_DOCUMENT', 'No text could be extracted from this file.');
+  const { kind } = classifyDocument(chunks.map((c) => c.content).join('\n'));
   return {
     sourceType: parsed.sourceType,
+    kind,
     title: titleFromFileName(input.fileName),
     pageCount: parsed.pageCount,
     contentHash,

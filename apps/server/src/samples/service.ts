@@ -10,6 +10,7 @@ import type { EmbeddingService } from '../retrieval/embeddings.js';
 interface SampleIndexEntry {
   slug: string;
   title: string;
+  kind: 'loan' | 'contract' | 'general';
   file: string;
   pageCount: number;
 }
@@ -38,7 +39,7 @@ export class SampleService {
     const out: SampleInfo[] = [];
     for (const e of entries) {
       const row = await this.documents.findBySampleSlug(e.slug);
-      out.push({ slug: e.slug, title: e.title, pageCount: e.pageCount, loaded: row?.status === 'embedded' });
+      out.push({ slug: e.slug, title: e.title, kind: e.kind, pageCount: e.pageCount, loaded: row?.status === 'embedded' });
     }
     return out;
   }
@@ -56,6 +57,7 @@ export class SampleService {
         {
           title: entry.title,
           sourceType: 'pdf',
+          kind: result.kind,
           contentHash: result.contentHash,
           pageCount: result.pageCount,
           ttlHours: 24 * 365 * 10,
@@ -79,6 +81,7 @@ export class SampleService {
       documentId: fresh.id,
       title: fresh.title,
       sourceType: fresh.source_type,
+      kind: fresh.kind,
       pageCount: fresh.page_count,
       chunkCount: fresh.chunk_count,
       status: fresh.status,

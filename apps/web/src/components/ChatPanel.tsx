@@ -5,14 +5,25 @@ import { askQuestion } from '../state/actions.js';
 import { useDispatch, type LoadedDoc } from '../state/store.js';
 import { CitationList, CitedText } from './Citations.jsx';
 
-const SUGGESTIONS = [
-  'What is the interest rate and is it fixed or floating?',
-  'Can I prepay or foreclose this loan, and what does it cost?',
-  'What is the true annual cost of this loan including all upfront fees?',
-  'What happens if I miss an EMI?',
-  'Can the lender change the interest rate on their own?',
-  'What personal data am I agreeing to share?',
-];
+const SUGGESTIONS: Record<LoadedDoc['kind'], string[]> = {
+  loan: [
+    'What is the interest rate and is it fixed or floating?',
+    'Can I prepay or foreclose this loan, and what does it cost?',
+    'What is the true annual cost of this loan including all upfront fees?',
+    'What happens if I miss an EMI?',
+    'Can the lender change the interest rate on their own?',
+    'What personal data am I agreeing to share?',
+  ],
+  contract: [
+    'How long is this agreement and can I leave early?',
+    'What do I have to pay, and when?',
+    'Under what conditions do I lose my deposit?',
+    'How much notice is needed to terminate, and who can terminate?',
+    'Does this renew automatically?',
+    'What happens if there is a dispute?',
+  ],
+  general: ['What is this document about?', 'Summarise the main points.', 'What are the key formulas or definitions?', 'Is there anything I should follow up on?'],
+};
 
 interface Props {
   doc: LoadedDoc;
@@ -88,7 +99,7 @@ export function ChatPanel({ doc, onCitation }: Props) {
       </div>
       {doc.chat.length === 0 && (
         <div className="suggestions">
-          {SUGGESTIONS.map((s) => (
+          {SUGGESTIONS[doc.kind].map((s) => (
             <button key={s} type="button" onClick={() => submit(s)} disabled={busy}>
               {s}
             </button>

@@ -730,6 +730,41 @@ table.terms .desc {
   color: var(--accent);
 }
 
+.badge.kind {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.outline-title {
+  margin: 0 0 6px;
+}
+
+.outline-summary {
+  color: #3a4250;
+  margin: 0 0 14px;
+}
+
+ol.outline {
+  padding-left: 20px;
+  margin: 0;
+}
+
+ol.outline li {
+  margin-bottom: 10px;
+}
+
+.outline-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.outline-gist {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* risks */
 .risk {
   padding: 12px;

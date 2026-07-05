@@ -197,7 +197,8 @@ describe('POST /api/documents/:id/ask', () => {
 describe('samples', () => {
   it('lists samples, loads one on demand and serves it as an embedded document', async () => {
     const list = await request(ctx.app).get('/api/samples').expect(200);
-    expect(list.body.length).toBe(5);
+    expect(list.body.length).toBe(7);
+    expect(list.body.map((s: { kind: string }) => s.kind)).toEqual(['loan', 'loan', 'loan', 'loan', 'loan', 'contract', 'general']);
     expect(list.body[0]).toMatchObject({ slug: 'personal-loan-fixed', loaded: false, pageCount: expect.any(Number) });
 
     const loaded = await request(ctx.app).post('/api/samples/personal-loan-fixed/load').expect(200);

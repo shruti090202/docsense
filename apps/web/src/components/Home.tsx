@@ -4,6 +4,8 @@ import { api } from '../api/client.js';
 import { loadSample, uploadFile } from '../state/actions.js';
 import { useDispatch } from '../state/store.js';
 
+const KIND_LABEL: Record<SampleInfo['kind'], string> = { loan: 'Loan agreement', contract: 'Contract', general: 'Notes' };
+
 export function Home() {
   const dispatch = useDispatch();
   const [samples, setSamples] = useState<SampleInfo[]>([]);
@@ -37,10 +39,11 @@ export function Home() {
 
   return (
     <div className="home">
-      <h1>Understand a loan agreement before you sign it.</h1>
+      <h1>Understand what you are about to sign.</h1>
       <p className="lede">
-        Upload a loan agreement or contract. DocSense pulls out the key terms with page citations, computes what the loan really
-        costs, flags one-sided clauses, and answers your questions from the document itself.
+        Upload a loan agreement and DocSense extracts the key terms with page citations, computes what the loan really costs,
+        and flags one-sided clauses. Upload any other contract for its key facts and risky clauses, or any document at all to
+        ask questions and get answers that cite the exact lines.
       </p>
       <div
         className={`dropzone${over ? ' over' : ''}`}
@@ -59,13 +62,13 @@ export function Home() {
         <div className="hint">Up to 10 MB and 60 pages. Text-based PDFs only (scans are rejected). Your file stays in this browser.</div>
       </div>
 
-      <h2 className="section">Or try a sample agreement</h2>
+      <h2 className="section">Or try a sample</h2>
       <div className="samples-grid">
         {samples.map((s) => (
           <button key={s.slug} type="button" className="sample-card" onClick={() => void pick(s.slug)} disabled={busy !== null}>
             <strong>{s.title}</strong>
             <small>
-              {s.pageCount} pages · fictional{s.loaded ? ' · already analysed' : ''}
+              {KIND_LABEL[s.kind]} · {s.pageCount} pages · fictional{s.loaded ? ' · already analysed' : ''}
             </small>
           </button>
         ))}
@@ -80,6 +83,10 @@ export function Home() {
         <div>
           <b>Every answer is cited</b>
           <p>Answers come only from your document. Click a citation to jump to the exact clause and page. If it is not in the document, it says so.</p>
+        </div>
+        <div>
+          <b>Knows what it is reading</b>
+          <p>A loan gets terms, true cost and lender-risk review; a rental, employment or service contract gets key facts and contract-risk review; notes and reports get an outline. Detected from the text, no setup.</p>
         </div>
         <div>
           <b>Math done by code</b>

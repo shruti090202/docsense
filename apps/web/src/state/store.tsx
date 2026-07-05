@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer, type Dispatch, type ReactNode } from 'react';
-import type { Citation, CostResponse, LoanTerms, PiiMap, RiskFlag, SourceType, ToolCallRecord } from '@docsense/shared';
+import type { Citation, ContractFacts, CostResponse, DocumentKind, LoanTerms, Outline, PiiMap, RiskFlag, SourceType, ToolCallRecord } from '@docsense/shared';
 
 export interface ChatMessage {
   id: string;
@@ -27,6 +27,7 @@ export interface LoadedDoc {
   id: string;
   title: string;
   sourceType: SourceType;
+  kind: DocumentKind;
   pageCount: number;
   chunkCount: number;
   isSample: boolean;
@@ -35,6 +36,8 @@ export interface LoadedDoc {
   warnings: string[];
   terms: LoanTerms | null;
   cost: CostResponse | null;
+  contractFacts: ContractFacts | null;
+  outline: Outline | null;
   risks: RiskFlag[] | null;
   analysis: AnalysisStatus;
   analysisError?: string;
@@ -56,6 +59,8 @@ export type Action =
   | { type: 'doc/remove'; id: string }
   | { type: 'doc/analysis'; id: string; status: AnalysisStatus; error?: string }
   | { type: 'doc/terms'; id: string; terms: LoanTerms; cost: CostResponse }
+  | { type: 'doc/facts'; id: string; facts: ContractFacts }
+  | { type: 'doc/outline'; id: string; outline: Outline }
   | { type: 'doc/risks'; id: string; risks: RiskFlag[] }
   | { type: 'chat/append'; id: string; message: ChatMessage }
   | { type: 'chat/update'; id: string; messageId: string; patch: Partial<ChatMessage> }
@@ -93,6 +98,10 @@ export function reducer(state: State, action: Action): State {
       return patchDoc(state, action.id, (d) => ({ ...d, analysis: action.status, ...(action.error ? { analysisError: action.error } : {}) }));
     case 'doc/terms':
       return patchDoc(state, action.id, (d) => ({ ...d, terms: action.terms, cost: action.cost }));
+    case 'doc/facts':
+      return patchDoc(state, action.id, (d) => ({ ...d, contractFacts: action.facts }));
+    case 'doc/outline':
+      return patchDoc(state, action.id, (d) => ({ ...d, outline: action.outline }));
     case 'doc/risks':
       return patchDoc(state, action.id, (d) => ({ ...d, risks: action.risks }));
     case 'chat/append':

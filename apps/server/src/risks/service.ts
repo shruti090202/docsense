@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { RiskCategorySchema, RiskFlagSchema, type RiskCategory, type RiskFlag } from '@docsense/shared';
+import { CONTRACT_RISK_CATEGORIES, LOAN_RISK_CATEGORIES, RiskCategorySchema, RiskFlagSchema, type DocumentKind, type RiskCategory, type RiskFlag } from '@docsense/shared';
 import type { ChunkRow, DocumentRepository, DocumentRow } from '../db/documents.js';
 import type { Db } from '../db/pool.js';
 import { HttpError } from '../http/errors.js';
@@ -16,10 +16,19 @@ export interface RiskCandidate {
 
 const MAX_CANDIDATES_PER_CATEGORY = 2;
 
+// Which clauses to look for depends on what the document is; notes and reports get no risk review.
+export function categoriesFor(kind: DocumentKind): RiskCategory[] {
+  if (kind === 'loan') return LOAN_RISK_CATEGORIES;
+  if (kind === 'contract') return CONTRACT_RISK_CATEGORIES;
+  return [];
+}
+
 // Regex pre-filter over every chunk: cheap, deterministic, and it bounds the size of the single model call.
-export function findCandidates(chunks: ChunkRow[]): RiskCandidate[] {
+export function findCandidates(chunks: ChunkRow[], categories: RiskCategory[] = LOAN_RISK_CATEGORIES): RiskCandidate[] {
   const out: RiskCandidate[] = [];
+  const wanted = new Set(categories);
   for (const rule of RISK_PATTERNS) {
+    if (!wanted.has(rule.category)) continue;
     const scored = chunks
       .map((chunk) => ({ category: rule.category, chunk, matches: rule.patterns.filter((p) => p.test(chunk.content)).length }))
       .filter((c) => c.matches > 0)
@@ -47,12 +56,12 @@ function reviewJsonSchema(): Record<string, unknown> {
   return rest;
 }
 
-const RISK_SYSTEM_PROMPT = `You review clauses from a loan agreement for a borrower. For each numbered candidate you are told which risk to check and given the passage. Decide from the passage text only.
+const RISK_SYSTEM_PROMPT = `You review clauses from an agreement on behalf of the weaker party (the borrower, tenant, employee or customer). For each numbered candidate you are told which risk to check and given the passage. Decide from the passage text only.
 
 Rules:
 1. present = true only when the passage itself contains the risk described. A clause that protects the borrower (e.g. requires 30 days' notice, allows free cancellation, limits sharing to regulators) is NOT the risk: mark present = false.
-2. severity: high when the clause can materially increase cost or remove the borrower's control (compounding penalties, discretionary rate changes, unrestricted data sharing, repossession without notice); medium for standard but one-sided terms; low for common protective terms with minor downside.
-3. explanation must be plain English for a non-lawyer, 2-3 sentences, no legal citations, no advice.
+2. severity: high when the clause can materially increase cost or remove the weaker party's control (compounding penalties, discretionary changes, forfeiture of a deposit, unlimited indemnity, termination or repossession without notice); medium for standard but one-sided terms; low for common protective terms with minor downside.
+3. explanation must be plain English for a non-lawyer, 2-3 sentences, no legal citations, no advice. Refer to the reader by role (borrower, tenant, employee, customer) as the document does.
 4. Tokens like [PAN_1] are redacted identifiers; ignore them.
 Review every candidate exactly once.`;
 
@@ -66,7 +75,7 @@ export class RiskService {
     const { db, llm, documents, logger } = this.deps;
     const started = Date.now();
     const chunks = await documents.listChunks(doc.id);
-    const candidates = findCandidates(chunks);
+    const candidates = findCandidates(chunks, categoriesFor(doc.kind));
     let flags: RiskFlag[] = [];
     if (candidates.length > 0) {
       const byCategory = new Map(RISK_PATTERNS.map((r) => [r.category, r]));

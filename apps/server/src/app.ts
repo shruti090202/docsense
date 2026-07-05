@@ -8,6 +8,8 @@ import { CompareService } from './compare/service.js';
 import type { Config } from './config.js';
 import { DocumentRepository } from './db/documents.js';
 import type { Db } from './db/pool.js';
+import { ContractFactsService } from './extraction/contractFacts.js';
+import { OutlineService } from './extraction/outline.js';
 import { ExtractionService } from './extraction/service.js';
 import { errorHandler, requestId } from './http/middleware.js';
 import { GeminiClient } from './llm/gemini.js';
@@ -59,6 +61,8 @@ export function createApp(deps: AppDeps): Express {
   const search = new HybridSearch(db, embeddings);
   const qa = new QaService({ db, config, llm, documents, embeddings, search, logger });
   const extraction = new ExtractionService({ db, llm, documents, search, logger, extractionModel: config.GEMINI_EXTRACTION_MODEL });
+  const contractFacts = new ContractFactsService({ db, llm, search, logger, model: config.GEMINI_EXTRACTION_MODEL });
+  const outline = new OutlineService({ db, llm, documents, logger, model: config.GEMINI_EXTRACTION_MODEL });
   const risks = new RiskService({ db, llm, documents, logger });
   const compare = new CompareService({ llm, documents, extraction, logger });
   const samplesDir = config.SAMPLES_DIR ?? path.resolve(import.meta.dirname, '../../../samples');
@@ -97,7 +101,7 @@ export function createApp(deps: AppDeps): Express {
   for (const route of ['/api/documents/:id/ask', '/api/documents/:id/extract', '/api/documents/:id/risks', '/api/compare']) app.use(route, llmLimiter);
   app.use('/api/documents', documentsRouter({ config, documents, embeddings, logger }));
   app.use('/api/documents', qaRouter({ qa, documents, embeddings }));
-  app.use('/api', analysisRouter({ documents, qa, extraction, risks, compare }));
+  app.use('/api', analysisRouter({ documents, qa, extraction, contractFacts, outline, risks, compare }));
   app.use('/api/samples', samplesRouter({ samples }));
   app.use('/internal', internalRouter({ config, documents, logger }));
 

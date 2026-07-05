@@ -45,7 +45,7 @@ export function TermsPanel({ doc, onCitation }: Props) {
         {doc.analysis === 'error' ? (
           <>
             <div className="callout">{doc.analysisError}</div>
-            <button className="btn" type="button" onClick={() => void runAnalysis(dispatch, doc.id)}>
+            <button className="btn" type="button" onClick={() => void runAnalysis(dispatch, doc.id, doc.kind)}>
               Retry analysis
             </button>
           </>

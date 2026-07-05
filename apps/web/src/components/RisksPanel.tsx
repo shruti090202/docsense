@@ -17,13 +17,20 @@ const LABELS: Record<string, string> = {
   arbitration: 'Arbitration',
   cross_default: 'Cross-default',
   security_interest: 'Security over assets',
+  auto_renewal: 'Automatic renewal',
+  lock_in: 'Lock-in period',
+  deposit_forfeiture: 'Deposit forfeiture',
+  broad_indemnity: 'Indemnity',
+  non_compete: 'Non-compete',
+  liability_limitation: 'Liability cap',
+  unilateral_amendment: 'Unilateral changes',
 };
 
 export function RisksPanel({ doc, onCitation }: Props) {
   if (doc.risks === null) {
     return (
       <div className="panel-body">
-        {doc.analysis === 'error' ? <div className="callout">{doc.analysisError}</div> : <div className="empty">Reviewing clauses for borrower risks…</div>}
+        {doc.analysis === 'error' ? <div className="callout">{doc.analysisError}</div> : <div className="empty">Reviewing clauses for risks…</div>}
       </div>
     );
   }
@@ -31,7 +38,7 @@ export function RisksPanel({ doc, onCitation }: Props) {
   return (
     <div className="panel-body">
       <div className="callout info">
-        Each flag was found by a rule-based scan and then confirmed by the model against the clause text. Click the page to read the clause yourself.
+        Each flag was found by a rule-based scan and then confirmed by the model against the clause text, from the {doc.kind === 'loan' ? "borrower's" : 'weaker party’s'} point of view. Click the page to read the clause yourself.
       </div>
       {doc.risks.map((r) => (
         <div key={r.category} className={`risk ${r.severity}`}>

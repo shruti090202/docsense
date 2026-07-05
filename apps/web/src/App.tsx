@@ -41,7 +41,9 @@ function SamplesMenu() {
               }}
             >
               <span>{s.title}</span>
-              <small>{s.pageCount} pp</small>
+              <small>
+                {s.kind} · {s.pageCount} pp
+              </small>
             </button>
           ))}
           {samples.length === 0 && <div className="empty">Loading…</div>}
@@ -90,7 +92,13 @@ function TopBar() {
           Upload
         </button>
         <SamplesMenu />
-        <button className={`btn${view.kind === 'compare' ? ' primary' : ''}`} type="button" disabled={order.length < 2} onClick={() => dispatch({ type: 'view', view: { kind: 'compare' } })}>
+        <button
+          className={`btn${view.kind === 'compare' ? ' primary' : ''}`}
+          type="button"
+          disabled={order.filter((id) => docs[id]!.kind === 'loan').length < 2}
+          title="Compare two loan agreements side by side"
+          onClick={() => dispatch({ type: 'view', view: { kind: 'compare' } })}
+        >
           Compare
         </button>
       </div>

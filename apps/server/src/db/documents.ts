@@ -1,4 +1,4 @@
-import type { DocumentStatus, LoanTerms, RiskFlag, SourceType } from '@docsense/shared';
+import type { ContractFacts, DocumentKind, DocumentStatus, LoanTerms, Outline, RiskFlag, SourceType } from '@docsense/shared';
 import type { Chunk } from '../ingest/types.js';
 import type { Db } from './pool.js';
 
@@ -6,6 +6,7 @@ export interface DocumentRow {
   id: string;
   title: string;
   source_type: SourceType;
+  kind: DocumentKind;
   content_hash: string;
   page_count: number;
   chunk_count: number;
@@ -13,6 +14,8 @@ export interface DocumentRow {
   sample_slug: string | null;
   status: DocumentStatus;
   extraction: LoanTerms | null;
+  contract_facts: ContractFacts | null;
+  outline: Outline | null;
   risk_flags: RiskFlag[] | null;
   created_at: Date;
   expires_at: Date;
@@ -32,6 +35,7 @@ export interface ChunkRow {
 export interface NewDocument {
   title: string;
   sourceType: SourceType;
+  kind: DocumentKind;
   contentHash: string;
   pageCount: number;
   ttlHours: number;
@@ -47,8 +51,8 @@ export class DocumentRepository {
     try {
       await client.query('BEGIN');
       const inserted = await client.query<DocumentRow>(
-        `INSERT INTO documents (title, source_type, content_hash, page_count, chunk_count, is_sample, sample_slug, expires_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, now() + ($8 || ' hours')::interval)
+        `INSERT INTO documents (title, source_type, kind, content_hash, page_count, chunk_count, is_sample, sample_slug, expires_at)
+         VALUES ($1, $2, $9, $3, $4, $5, $6, $7, now() + ($8 || ' hours')::interval)
          RETURNING *`,
         [
           doc.title,
@@ -59,6 +63,7 @@ export class DocumentRepository {
           doc.isSample ?? false,
           doc.sampleSlug ?? null,
           String(doc.ttlHours),
+          doc.kind,
         ],
       );
       const row = inserted.rows[0]!;

@@ -5,8 +5,10 @@ import { fee, money, months, percent } from '../lib/format.js';
 import { useDispatch, useStore } from '../state/store.js';
 
 export function CompareView() {
-  const { docs, order } = useStore();
+  const { docs, order: allDocs } = useStore();
   const dispatch = useDispatch();
+  // only loan agreements have a cost model to compare
+  const order = allDocs.filter((id) => docs[id]!.kind === 'loan');
   const [leftId, setLeftId] = useState(order[0] ?? '');
   const [rightId, setRightId] = useState(order[1] ?? '');
   const [result, setResult] = useState<CompareResponse | null>(null);
@@ -70,7 +72,7 @@ export function CompareView() {
       <h1>Compare two offers</h1>
       <p className="lede">Extracted terms and code-computed costs side by side. The cheaper offer is the one with the lower effective annual rate.</p>
       {order.length < 2 ? (
-        <div className="callout">Load at least two documents (upload or “Try a sample”) to compare them.</div>
+        <div className="callout">Load at least two loan agreements (upload or “Try a sample”) to compare them. Other document types have no cost model to compare.</div>
       ) : (
         <div className="compare-pick">
           <select value={leftId} onChange={(e) => setLeftId(e.target.value)}>

@@ -1,10 +1,9 @@
 import { z } from 'zod';
 import {
+  AnalysisResponseSchema,
   AskResponseSchema,
   CompareResponseSchema,
-  CostResponseSchema,
   DocumentSummarySchema,
-  LoanTermsSchema,
   RiskFlagSchema,
   SampleInfoSchema,
   UploadResponseSchema,
@@ -93,8 +92,7 @@ export const api = {
 
   ask: (documentId: string, body: AskRequest): Promise<AskResponse> => call(`/api/documents/${documentId}/ask`, json(body), AskResponseSchema),
 
-  extract: (documentId: string) =>
-    call(`/api/documents/${documentId}/extract`, { method: 'POST' }, z.object({ terms: LoanTermsSchema, cost: CostResponseSchema })),
+  extract: (documentId: string) => call(`/api/documents/${documentId}/extract`, { method: 'POST' }, AnalysisResponseSchema),
 
   risks: (documentId: string) => call(`/api/documents/${documentId}/risks`, { method: 'POST' }, z.object({ riskFlags: z.array(RiskFlagSchema) })),
 

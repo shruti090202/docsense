@@ -2,31 +2,50 @@
   {
     "slug": "personal-loan-fixed",
     "title": "Meridian Personal Loan Agreement",
+    "kind": "loan",
     "file": "pdf/personal-loan-fixed.pdf",
     "pageCount": 5
   },
   {
     "slug": "home-loan-floating",
     "title": "Sunrise Housing Loan Agreement",
+    "kind": "loan",
     "file": "pdf/home-loan-floating.pdf",
     "pageCount": 5
   },
   {
     "slug": "vehicle-loan-flat",
     "title": "Trident Vehicle Loan Cum Hypothecation Agreement",
+    "kind": "loan",
     "file": "pdf/vehicle-loan-flat.pdf",
     "pageCount": 5
   },
   {
     "slug": "business-loan-kfs",
     "title": "Cobalt Business Loan Sanction Letter and Key Facts Statement",
+    "kind": "loan",
     "file": "pdf/business-loan-kfs.pdf",
     "pageCount": 5
   },
   {
     "slug": "education-loan-floating",
     "title": "Lumen Education Loan Agreement",
+    "kind": "loan",
     "file": "pdf/education-loan-floating.pdf",
     "pageCount": 5
+  },
+  {
+    "slug": "residential-lease",
+    "title": "Residential lease",
+    "kind": "contract",
+    "file": "pdf/residential-lease.pdf",
+    "pageCount": 3
+  },
+  {
+    "slug": "lecture-notes-tvm",
+    "title": "Lecture notes (finance)",
+    "kind": "general",
+    "file": "pdf/lecture-notes-tvm.pdf",
+    "pageCount": 2
   }
 ]
