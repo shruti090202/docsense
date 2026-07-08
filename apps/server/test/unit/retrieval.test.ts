@@ -146,3 +146,20 @@ describe('withRetry', () => {
     expect(calls).toBe(1);
   });
 });
+
+describe('RateLimiter with batch cost', () => {
+  it('charges a batch for every item and paces the next call accordingly', async () => {
+    let now = 0;
+    const sleeps: number[] = [];
+    const limiter = new RateLimiter(100, () => now, async (ms) => {
+      sleeps.push(ms);
+      now += ms;
+    });
+    await limiter.acquire(32);
+    await limiter.acquire(32);
+    await limiter.acquire(32);
+    expect(sleeps).toEqual([]);
+    await limiter.acquire(32);
+    expect(sleeps).toEqual([16_800]);
+  });
+});

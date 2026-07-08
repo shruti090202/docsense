@@ -1,0 +1,17 @@
+name: cleanup
+
+# Render's free tier has no scheduler, so expired documents are purged from here every six hours.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: delete documents older than the TTL
+        run: |
+          curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 30 \
+            -X POST "${{ secrets.API_BASE_URL }}/internal/cleanup" \
+            -H "Authorization: Bearer ${{ secrets.CLEANUP_TOKEN }}"

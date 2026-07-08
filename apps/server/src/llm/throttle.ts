@@ -21,15 +21,18 @@ export class RateLimiter {
   }
 
   // Serialises callers so bursts are spread out rather than all sleeping then all firing.
-  acquire(): Promise<void> {
+  // `cost` is the number of quota units the call consumes: the embedding quota counts every text in
+  // a batch, not the request, so a batch of 32 chunks costs 32.
+  acquire(cost = 1): Promise<void> {
+    const need = Math.min(Math.max(1, cost), this.perMinute);
     const next = this.queue.then(async () => {
       this.refill();
-      if (this.tokens < 1) {
-        const waitMs = Math.ceil(((1 - this.tokens) / this.perMinute) * 60_000);
+      if (this.tokens < need) {
+        const waitMs = Math.ceil(((need - this.tokens) / this.perMinute) * 60_000);
         await this.sleep(waitMs);
         this.refill();
       }
-      this.tokens -= 1;
+      this.tokens -= need;
     });
     this.queue = next.catch(() => undefined);
     return next;

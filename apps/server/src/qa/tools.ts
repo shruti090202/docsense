@@ -73,32 +73,45 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
 
 export type ToolResult = Record<string, unknown>;
 
+const inr = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+// Every rupee figure is returned twice: as a number and as an Indian-formatted string. The model is told
+// to copy the string; re-typing 380000.2 as "3,800,000.20" is exactly the kind of slip this prevents.
+function withDisplay(result: Record<string, unknown>): ToolResult {
+  const display: Record<string, string> = {};
+  for (const [k, v] of Object.entries(result)) {
+    if (typeof v !== 'number') continue;
+    display[k] = /percent|rate/i.test(k) ? `${v.toFixed(2)}%` : k === 'tenureMonths' ? `${v} months` : `Rs. ${inr.format(v)}`;
+  }
+  return { ...result, display };
+}
+
 export function executeTool(name: string, args: Record<string, unknown>): ToolResult {
   try {
     switch (name) {
       case 'calculate_emi': {
         const a = EmiArgs.parse(args);
         const emi = a.method === 'flat' ? emiFlat(a.principal, a.annualRatePercent, a.tenureMonths) : emiReducing(a.principal, a.annualRatePercent, a.tenureMonths);
-        return { emi: round2(emi), method: a.method, currency: 'INR' };
+        return withDisplay({ emi: round2(emi), method: a.method });
       }
       case 'calculate_total_cost': {
         const a = TotalCostArgs.parse(args);
         const totalRepayment = round2(a.emi * a.tenureMonths);
         const totalInterest = round2(totalRepayment - a.principal);
-        return { totalRepayment, totalInterest, upfrontFees: round2(a.upfrontFees), totalCostOfCredit: round2(totalInterest + a.upfrontFees), currency: 'INR' };
+        return withDisplay({ totalRepayment, totalInterest, upfrontFees: round2(a.upfrontFees), totalCostOfCredit: round2(totalInterest + a.upfrontFees) });
       }
       case 'calculate_effective_annual_rate': {
         const a = EffectiveRateArgs.parse(args);
         const r = loanCost({ ...a, statedEmi: a.statedEmi });
-        return { ...r, currency: 'INR' };
+        return withDisplay({ ...r });
       }
       case 'sum_amounts': {
         const a = SumArgs.parse(args);
-        return { total: round2(a.amounts.reduce((s, x) => s + x, 0)) };
+        return withDisplay({ total: round2(a.amounts.reduce((s, x) => s + x, 0)) });
       }
       case 'percent_of': {
         const a = PercentOfArgs.parse(args);
-        return { result: round2((a.percent / 100) * a.amount) };
+        return withDisplay({ result: round2((a.percent / 100) * a.amount) });
       }
       default:
         return { error: `unknown tool ${name}` };

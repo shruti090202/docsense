@@ -21,3 +21,6 @@ Thumbs.db
 
 # copied from samples/pdf by apps/web/scripts/copy-samples.mjs
 apps/web/public/samples/
+
+# per-run eval output; the full report is committed on purpose
+eval/reports/ci.*

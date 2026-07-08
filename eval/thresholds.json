@@ -1,0 +1,7 @@
+{
+  "retrievalRecallAt8": 0.9,
+  "extractionFieldAccuracy": 0.85,
+  "numericAnswerAccuracy": 0.8,
+  "citationAccuracy": 0.8,
+  "notInDocumentAccuracy": 0.75
+}

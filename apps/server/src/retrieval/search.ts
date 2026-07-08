@@ -35,12 +35,15 @@ export class HybridSearch {
     return rows;
   }
 
+  // A natural-language question is OR-ed lexeme by lexeme ("prepay | foreclos | loan | cost"), so a chunk
+  // that shares any stemmed term is a candidate and ts_rank_cd rewards the ones that share more. AND
+  // semantics (websearch_to_tsquery) returned nothing for most questions in the evaluation.
   async textSearch(documentId: string, query: string, k: number): Promise<ChunkRow[]> {
-    // websearch_to_tsquery tolerates free-form questions; an all-stopword query yields no lexemes
     const { rows } = await this.db.query<ChunkRow>(
-      `WITH q AS (SELECT websearch_to_tsquery('english', $2) AS query)
+      `WITH lex AS (SELECT string_agg(lexeme, ' | ') AS terms FROM unnest(to_tsvector('english', $2))),
+            q AS (SELECT to_tsquery('english', terms) AS query FROM lex WHERE terms IS NOT NULL)
        SELECT ${CHUNK_COLUMNS} FROM chunks, q
-       WHERE document_id = $1 AND numnode(q.query) > 0 AND tsv @@ q.query
+       WHERE document_id = $1 AND tsv @@ q.query
        ORDER BY ts_rank_cd(tsv, q.query) DESC, chunk_index
        LIMIT $3`,
       [documentId, query, k],

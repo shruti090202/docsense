@@ -1,0 +1,22 @@
+{
+  "name": "@docsense/eval",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "tsx src/run.ts",
+    "run:ci": "tsx src/run.ts --subset ci --check",
+    "fixture:export": "tsx src/fixture.ts export",
+    "fixture:import": "tsx src/fixture.ts import",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@docsense/server": "*",
+    "@docsense/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3"
+  }
+}

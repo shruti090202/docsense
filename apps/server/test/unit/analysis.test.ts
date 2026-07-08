@@ -30,14 +30,15 @@ describe('calculator tools', () => {
       totalInterest: 115197.16,
       upfrontFees: 18300,
       totalCostOfCredit: 133497.16,
-      currency: 'INR',
+      display: { totalRepayment: 'Rs. 6,15,197.16', totalInterest: 'Rs. 1,15,197.16', upfrontFees: 'Rs. 18,300.00', totalCostOfCredit: 'Rs. 1,33,497.16' },
     });
     const eff = executeTool('calculate_effective_annual_rate', { principal: 500000, annualRatePercent: 14, tenureMonths: 36, upfrontFees: 18300, statedEmi: 17088.81 });
     expect(eff['emi']).toBe(17088.81);
     expect(eff['netDisbursal']).toBe(481700);
     expect(eff['aprPercent']).toBeGreaterThan(14);
-    expect(executeTool('percent_of', { percent: 2, amount: 500000 })).toEqual({ result: 10000 });
-    expect(executeTool('sum_amounts', { amounts: [8000, 1500, 600, 400] })).toEqual({ total: 10500 });
+    expect(executeTool('percent_of', { percent: 2, amount: 500000 })).toMatchObject({ result: 10000, display: { result: 'Rs. 10,000.00' } });
+    expect(executeTool('sum_amounts', { amounts: [8000, 1500, 600, 400] })).toMatchObject({ total: 10500 });
+    expect((executeTool('calculate_effective_annual_rate', { principal: 800000, annualRatePercent: 9.5, tenureMonths: 60, method: 'flat', upfrontFees: 10500 })['display'] as Record<string, string>)['effectiveAnnualRatePercent']).toBe('18.51%');
   });
 
   it('returns a readable error for bad arguments instead of throwing', () => {

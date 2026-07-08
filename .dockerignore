@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+**/dist
+apps/web/*
+!apps/web/package.json
+eval/*
+!eval/package.json
+samples/docx
+samples/ground-truth
+samples/src
+.git
+.env
+.env.*
+*.md

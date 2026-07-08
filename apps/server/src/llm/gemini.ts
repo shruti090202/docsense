@@ -132,7 +132,7 @@ export class GeminiClient implements LlmClient {
 
   async embed(texts: string[], taskType: EmbeddingTaskType): Promise<number[][]> {
     if (texts.length === 0) return [];
-    await this.embedLimiter.acquire();
+    await this.embedLimiter.acquire(texts.length);
     const started = Date.now();
     const res = await this.retrying('embed', () =>
       this.ai.models.embedContent({
