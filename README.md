@@ -4,7 +4,7 @@ Understand what you are about to sign. Upload a loan agreement and DocSense extr
 citations, computes what the loan really costs, and flags one-sided clauses. Upload any other contract for its
 key facts and risky clauses, or any document at all to ask questions and get answers that cite the exact lines.
 
-**Live demo:** _link added after deployment_ · **API:** _link added after deployment_
+**Live demo:** https://docsense-gamma.vercel.app · **API:** https://docsense-api-6k55.onrender.com (`/health`)
 
 > Educational portfolio project. Not financial or legal advice. Sample documents are fictional. The demo runs
 > on free tiers: the API sleeps after 15 idle minutes and takes about a minute to wake up.
@@ -174,7 +174,37 @@ npm run dev:web                         # http://localhost:5173
 
 Tests: `npm run test:unit` (no network, no database), `npm run test:integration -w apps/server` (Postgres,
 LLM faked), `npm test` for everything. Evaluation: `npm run run:ci -w eval` (fast subset) or
-`npm run run -w eval -- --ablations` (full). Deployment: Render, Neon, Vercel and GitHub Actions.
+`npm run run -w eval -- --ablations --export-fixture` (full; re-export the fixture when samples or golden
+queries change). Local Node is 20; the server pins `pdfjs-dist` 5.6.205 (6.x needs Node 22), the web app pins
+6.3.289 to match react-pdf, and `jsdom` is overridden to 26.
+
+## Development conventions
+
+- Nothing that leaves the server may contain PII. Masking runs on parsed pages before chunking, so the database
+  and every model call only ever see placeholders; the placeholder map is returned to the browser once and never
+  stored. Original files are never written anywhere.
+- The model never does arithmetic. Every number comes from `packages/shared/src/finance`, exposed as
+  function-calling tools and unit-tested against known values and an independent solver.
+- Every answer, extracted field, fact, outline entry and risk flag carries a citation resolved by the server from
+  the passage number; the model cannot invent a page. Retrieval finding nothing yields a refusal, not a guess.
+- `/health` never touches the database (Neon autosuspends after 5 minutes). Pool size 4, one document at a time.
+- Migrations are plain SQL under `apps/server/migrations`, never edited after commit; they run at container boot.
+- Configuration comes only from environment variables validated by `apps/server/src/config.ts`.
+- Errors are `{ error: { code, message, requestId } }` via `HttpError` / `IngestError` / `LlmError`.
+- Integration tests run against a real pgvector with the LLM faked (feature-hashed embeddings); only the eval
+  job calls Gemini. Numbers in this README come from `eval/reports/latest.md`, never typed by hand.
+
+## Deployment
+
+The API is a Docker image on Render's free plan (`render.yaml` blueprint: multi-stage build, esbuild bundle,
+migrations at boot, ~120 MB idle), Postgres with pgvector on Neon's free plan (pooled connection string as
+`DATABASE_URL`), the web app on Vercel (`vercel.json`; `VITE_API_URL` points at the API and the API's
+`CORS_ORIGIN` points back), and GitHub Actions for what the free tiers lack: `cleanup.yml` calls the
+bearer-protected `/internal/cleanup` every six hours (secrets `API_BASE_URL`, `CLEANUP_TOKEN`), `eval.yml` runs
+the fast evaluation subset on pull requests and the full suite weekly (secret `GEMINI_API_KEY`), and `ci.yml` runs
+typecheck, unit and integration tests and verifies the sample corpus is reproducible. Sentry is optional
+(`SENTRY_DSN`). Verify a deployment with `node scripts/smoke.mjs <api-url> <web-url>`: cold start, database,
+samples, a cited answer, extraction, the cleanup guard and the web app, at a cost of at most two model calls.
 
 ## Limitations
 
